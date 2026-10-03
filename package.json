@@ -1,0 +1,26 @@
+{
+  "name": "opencode-mtls",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "OpenCode v2 provider plugin for mTLS-protected LLM endpoints.",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "check": "bun run typecheck && bun test"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.18"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.8",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
+  }
+}
