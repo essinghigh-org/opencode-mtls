@@ -9,6 +9,7 @@ describe("parseOptions", () => {
           proxy: {
             name: "Proxy",
             baseURL: "https://llm.example.test/v1",
+            transport: "websocket",
             tls: {
               certFile: "/tmp/client.crt",
               keyFile: "/tmp/client.key",
@@ -23,6 +24,7 @@ describe("parseOptions", () => {
           name: "Proxy",
           baseURL: "https://llm.example.test/v1",
           package: undefined,
+          transport: "websocket",
           settings: undefined,
           tls: {
             certFile: "/tmp/client.crt",
@@ -47,6 +49,20 @@ describe("parseOptions", () => {
         },
       }),
     ).toThrow("must use https://")
+  })
+
+  test("rejects unknown transports", () => {
+    expect(() =>
+      parseOptions({
+        providers: {
+          proxy: {
+            baseURL: "https://llm.example.test/v1",
+            transport: "quic",
+            tls: { certFile: "client.crt", keyFile: "client.key" },
+          },
+        },
+      }),
+    ).toThrow("transport must be auto, http, or websocket")
   })
 
   test("requires at least one provider", () => {

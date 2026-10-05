@@ -83,7 +83,7 @@ describe("applyProvider", () => {
       headers: { "x-opencode-mtls-bridge": "secret" },
       settings: {
         baseURL: "http://127.0.0.1:43123/v1",
-        transport: "http",
+        transport: "websocket",
       },
     })
     expect(record.provider.settings.apiKey).toBeUndefined()
@@ -105,6 +105,29 @@ describe("applyProvider", () => {
       settings: { reasoningSummary: "auto", reasoningEffort: "medium" },
       limit: { context: 872000, output: 128000 },
     })
+  })
+
+  test("keeps HTTPS/SSE available when transport=http is selected", () => {
+    const records = new Map<string, any>()
+    const editor = editorFor(records)
+
+    applyProvider(
+      editor,
+      "responses-http",
+      {
+        baseURL: "https://llm.example.test/v1",
+        protocol: "responses",
+        transport: "http",
+        tls: { certFile: "/client.crt", keyFile: "/client.key" },
+      },
+      [{ id: "responses-model", protocol: "responses" }],
+      {
+        baseURL: "http://127.0.0.1:43125/v1",
+        headers: { "x-opencode-mtls-bridge": "secret3" },
+      },
+    )
+
+    expect(records.get("responses-http").provider.settings.transport).toBe("http")
   })
 
   test("uses the native OpenAI-compatible provider for chat-completions models", () => {

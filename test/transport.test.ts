@@ -86,8 +86,15 @@ beforeAll(async () => {
       requestCert: true,
       rejectUnauthorized: true,
     },
-    async fetch(request) {
+    async fetch(request, server) {
       const url = new URL(request.url)
+
+      if (url.pathname === "/v1/ws" && request.headers.get("upgrade")?.toLowerCase() === "websocket") {
+        const upgraded = server.upgrade(request, {
+          data: { bridgeHeader: request.headers.get(BRIDGE_HEADER) },
+        })
+        return upgraded ? undefined : new Response("upgrade failed", { status: 500 })
+      }
 
       if (url.pathname === "/v1/echo") {
         return new Response(
@@ -143,6 +150,15 @@ beforeAll(async () => {
       }
 
       return new Response("mTLS ok")
+    },
+    websocket: {
+      data: {} as { bridgeHeader: string | null },
+      message(socket, message) {
+        socket.send(JSON.stringify({
+          message: typeof message === "string" ? message : message.toString(),
+          bridgeHeader: socket.data.bridgeHeader,
+        }))
+      },
     },
   })
 })
@@ -200,6 +216,32 @@ describe("createMtlsBridge", () => {
         acceptEncoding: "identity",
       })
     } finally {
+      bridge.close()
+    }
+  })
+
+  test("forwards WebSocket frames through mTLS without exposing the bridge capability", async () => {
+    const bridge = await createMtlsBridge(`https://127.0.0.1:${server.port}/v1`, tlsFiles())
+    const BunWebSocket = WebSocket as unknown as {
+      new (url: string | URL, options?: Bun.WebSocketOptions): WebSocket
+    }
+    const socket = new BunWebSocket(`${bridge.baseURL.replace(/^http:/, "ws:")}/ws`, {
+      headers: bridge.headers,
+    })
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        socket.addEventListener("open", () => resolve(), { once: true })
+        socket.addEventListener("error", () => reject(new Error("websocket open failed")), { once: true })
+      })
+      socket.send("hello")
+      const message = await new Promise<string>((resolve, reject) => {
+        socket.addEventListener("message", (event) => resolve(String(event.data)), { once: true })
+        socket.addEventListener("error", () => reject(new Error("websocket message failed")), { once: true })
+      })
+      expect(JSON.parse(message)).toEqual({ message: "hello", bridgeHeader: null })
+    } finally {
+      socket.close()
       bridge.close()
     }
   })

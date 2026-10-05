@@ -14,6 +14,7 @@ export type ProviderOptions = {
   baseURL: string
   package?: string
   protocol?: "auto" | "responses" | "chat-completions"
+  transport?: "auto" | "http" | "websocket"
   settings?: Record<string, unknown>
   tls: TLSFiles
 }
@@ -62,11 +63,17 @@ function parseProvider(id: string, input: unknown): ProviderOptions {
     throw new Error(`providers.${id}.protocol must be auto, responses, or chat-completions`)
   }
 
+  const transport = optionalString(value.transport, `providers.${id}.transport`)
+  if (transport !== undefined && transport !== "auto" && transport !== "http" && transport !== "websocket") {
+    throw new Error(`providers.${id}.transport must be auto, http, or websocket`)
+  }
+
   return {
     name: optionalString(value.name, `providers.${id}.name`),
     baseURL,
     package: optionalString(value.package, `providers.${id}.package`),
     protocol: protocol as ProviderOptions["protocol"],
+    transport: transport as ProviderOptions["transport"],
     settings: value.settings === undefined ? undefined : record(value.settings, `providers.${id}.settings`),
     tls: {
       certFile: string(tls.certFile, `providers.${id}.tls.certFile`),

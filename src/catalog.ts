@@ -19,12 +19,16 @@ export function applyProvider(
 ) {
   const records = editor.list()
   const responses = usesResponses(config, discovered)
+  if (!responses && config.transport === "websocket") {
+    throw new Error(`providers.${id}.transport=websocket requires the Responses protocol`)
+  }
   const providerID = Provider.ID.make(id)
   const packageName = nativePackage(config.package, responses)
+  const transport = responses && config.transport !== "http" ? "websocket" : "http"
   const settings = {
     ...(config.settings ?? {}),
     baseURL: bridge.baseURL,
-    transport: "http",
+    transport,
     ...(!responses ? { provider: id } : {}),
   } as Record<string, unknown>
 
