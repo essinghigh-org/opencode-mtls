@@ -2,6 +2,7 @@ import type { TLSFiles } from "./options"
 import { resolveFile } from "./options"
 
 export const BRIDGE_HEADER = "x-opencode-mtls-bridge"
+const MAX_WEBSOCKET_PAYLOAD_BYTES = 64 * 1024 * 1024
 
 export type MtlsBridge = {
   baseURL: string
@@ -129,6 +130,7 @@ export async function createMtlsBridge(baseURL: string, input: TLSFiles): Promis
     },
     websocket: {
       data: {} as BridgeSocketData,
+      maxPayloadLength: MAX_WEBSOCKET_PAYLOAD_BYTES,
       open(socket) {
         const BunWebSocket = WebSocket as unknown as {
           new (url: string | URL, options?: Bun.WebSocketOptions): WebSocket
