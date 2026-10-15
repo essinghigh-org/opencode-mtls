@@ -11,7 +11,8 @@
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "check": "bun run typecheck && bun test"
+    "check": "bun run typecheck && bun test",
+    "test:e2e": "bun test/e2e.ts"
   },
   "dependencies": {
     "@opencode/plugin": "2.0.29"

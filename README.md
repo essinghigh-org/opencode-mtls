@@ -162,3 +162,20 @@ bun run check
 ```
 
 The test suite verifies mTLS authentication, protected HTTP and WebSocket loopback forwarding, SSE streaming, native provider transport selection, model discovery, and rich OpenCode model metadata mapping.
+
+## CI: real OpenCode integration
+
+GitHub Actions tests pushes, pull requests, manual dispatches, and **daily** runs against the latest published `@opencode/cli` release. This catches upstream breaking changes without requiring a commit here. It also runs the typecheck and unit tests. The E2E suite runs twice: once loading the checkout as a local plugin and once installing an npm-packed copy through OpenCode's package loader.
+
+The end-to-end test starts a temporary, local HTTPS/WSS OpenAI Responses mock requiring a client certificate signed by a test-only CA. It then starts the **real OpenCode CLI**, loads this checkout's plugin via `server.ts`, discovers `/v1/models`, and sends a prompt through both the default **WebSocket** and explicit **HTTP/SSE** Responses transports. The test requires the expected provider/model, request content, and streamed assistant text. It separately verifies that a client without a certificate is rejected. The mock uses no real credentials or external model APIs.
+
+Run locally with Bun, OpenSSL, and a published OpenCode V2 CLI on your `PATH`:
+
+```bash
+bun install --frozen-lockfile
+bun run check
+npm install --global @opencode/cli@latest
+bun run test:e2e
+```
+
+Alternatively set `OPENCODE_BIN=/absolute/path/to/opencode` when invoking `bun run test:e2e`. To exercise package installation locally, run `npm pack` and set `OPENCODE_E2E_PLUGIN_PACKAGE=opencode-mtls@file:/absolute/path/to/opencode-mtls-0.4.0.tgz` before `bun run test:e2e`. The test isolates OpenCode's home/config/cache in temporary directories and cleans them up after execution. It does not touch existing OpenCode settings or accounts.
