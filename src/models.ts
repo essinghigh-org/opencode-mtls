@@ -13,6 +13,7 @@ export type DiscoveredModel = {
   protocol?: "responses" | "chat-completions"
   reasoningDefault?: string
   reasoningSupported?: string[]
+  supportsReasoningEffortUpdates?: boolean
   status?: "alpha" | "beta" | "deprecated" | "active"
 }
 
@@ -60,6 +61,9 @@ export async function discoverModels(baseURL: string, transport: typeof fetch) {
         protocol: api === "responses" || api === "openai/responses" ? "responses" : api === "chat-completions" ? api : undefined,
         reasoningDefault: optionalString(reasoning?.default),
         reasoningSupported: strings(reasoning?.supported),
+        supportsReasoningEffortUpdates: typeof item.supports_reasoning_effort_updates === "boolean"
+          ? item.supports_reasoning_effort_updates
+          : undefined,
         status: status(item.status),
       },
     ]

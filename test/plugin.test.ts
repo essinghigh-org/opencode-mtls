@@ -44,6 +44,7 @@ describe("applyProvider", () => {
         outputModalities: ["text"],
         supportsTools: true,
         reasoningDefault: "medium",
+        supportsReasoningEffortUpdates: true,
         reasoningSupported: ["low", "medium", "high", "xhigh", "max"],
       },
     ]
@@ -95,6 +96,7 @@ describe("applyProvider", () => {
       providerID: "codex-proxy",
       name: "qwen-hidden",
       capabilities: { tools: true, input: ["text", "image"], output: ["text"] },
+      compatibility: { supportsEffortUpdates: true },
       variants: [
         { id: "low", settings: { reasoningEffort: "low" } },
         { id: "medium", settings: { reasoningEffort: "medium" } },
@@ -120,7 +122,7 @@ describe("applyProvider", () => {
         transport: "http",
         tls: { certFile: "/client.crt", keyFile: "/client.key" },
       },
-      [{ id: "responses-model", protocol: "responses" }],
+      [{ id: "responses-model", protocol: "responses", supportsReasoningEffortUpdates: false }],
       {
         baseURL: "http://127.0.0.1:43125/v1",
         headers: { "x-opencode-mtls-bridge": "secret3" },
@@ -128,6 +130,7 @@ describe("applyProvider", () => {
     )
 
     expect(records.get("responses-http").provider.settings.transport).toBe("http")
+    expect(records.get("responses-http").models.get("responses-model").compatibility.supportsEffortUpdates).toBe(false)
   })
 
   test("uses the native OpenAI-compatible provider for chat-completions models", () => {

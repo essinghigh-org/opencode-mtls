@@ -126,6 +126,7 @@ These map into OpenCode v2 as follows:
 - input/output modalities -> model capabilities
 - `supported_features: ["tools"]` -> tool capability
 - `reasoning.supported` -> native OpenCode reasoning variants
+- `supports_reasoning_effort_updates` -> model-level `compatibility.supportsEffortUpdates` (preserves prompt caching across reasoning changes where the backend supports `configuration_update`; no guesswork from hidden upstream model aliases)
 - `reasoning.default` -> default `reasoningEffort`
 
 If a discovered model ID already exists elsewhere in OpenCode's catalog, the plugin can reuse known family, cost, release, and fallback metadata where the discovery response does not override it.

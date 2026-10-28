@@ -48,6 +48,7 @@ try {
             id: model,
             object: "model",
             api: "responses",
+            supports_reasoning_effort_updates: true,
             context_length: 128_000,
             max_output_length: 2048,
             input_modalities: ["text"],

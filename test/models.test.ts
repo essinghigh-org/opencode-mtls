@@ -14,6 +14,7 @@ describe("discoverModels", () => {
             id: "qwen-hidden",
             name: "qwen-hidden",
             api: "responses",
+            supports_reasoning_effort_updates: true,
             context_length: 272000,
             max_context_length: 872000,
             max_output_length: 128000,
@@ -43,6 +44,7 @@ describe("discoverModels", () => {
         protocol: "responses",
         reasoningDefault: "medium",
         reasoningSupported: ["low", "medium", "high", "xhigh"],
+        supportsReasoningEffortUpdates: true,
       },
     ])
     expect(requested).toBe("https://llm.example.test/v1/models")

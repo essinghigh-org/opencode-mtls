@@ -46,6 +46,9 @@ export function applyProvider(
       modelID,
       name: model.name ?? template?.name ?? model.id,
       ...(template?.family ? { family: template.family } : {}),
+      ...(model.supportsReasoningEffortUpdates !== undefined
+        ? { compatibility: { ...template?.compatibility, supportsEffortUpdates: model.supportsReasoningEffortUpdates } }
+        : template?.compatibility ? { compatibility: { ...template.compatibility } } : {}),
       capabilities: {
         tools: model.supportsTools ?? template?.capabilities.tools ?? true,
         input: [...(model.inputModalities ?? template?.capabilities.input ?? ["text"])],
